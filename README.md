@@ -1,51 +1,72 @@
 # test-manager-library-3413974-tool
 
-> **Prueba técnica · Ficha ADSO 3413974**
-> Horario: de **9:15 a. m. a 3:00 p. m.** (15:00). Después, **feria de presentación** de cada proyecto.
+> **Prueba técnica · Ficha ADSO 3413974 · SENA**  
+> Utilidad de sembrado y pruebas de demostración para **Manager Library**.  
+> Cumple la tarea **T-21** de la especificación SDD: sembrado masivo exclusivamente a través de los endpoints HTTP de la API.
 
-Este repositorio guarda las **utilidades** de *Manager Library*: el sembrador de datos de demostración, que usa la API. **Empieza vacío a propósito**: se construye en el fork de cada aprendiz.
+---
 
-## Instrucciones
+## 1. Características del Sembrador (`seed.js`)
 
-Cada aprendiz debe **crear el fork** de los seis repositorios del proyecto y **resolver el proyecto
-con el spec planteado**.
+- **Autenticación completa**: Inicia sesión como `admin`, aprovisiona un usuario con rol `librarian` e inicia sesión con dicho rol.
+- **Categorías**: Valida las 5 categorías oficiales sembradas por la migración.
+- **Catálogo de Libros**: Registra **42 libros reales** con títulos, autores, ISBN-13 válidos y ejemplares clasificados en las 5 categorías.
+- **Socios**: Da de alta **10 socios** con nombres reales y documentos de identidad únicos.
+- **Préstamos y Devoluciones**: Registra **15 préstamos**, devolviendo algunos para generar histórico cerrado y dejando otros abiertos.
+- **Líneas Vencidas**: Registra exactamente **3 préstamos con fecha anterior a 14 días**, de modo que `/api/v1/loans/overdue` entrega líneas vencidas con cálculo de `days_late`.
+- **Reporte**: Genera actividad demostrable para que `/api/v1/reports/most-borrowed` contenga filas agrupadas por metadatos congelados.
 
-1. Hacer fork, a su cuenta de GitHub, de cada repositorio de la tabla del final.
-2. Leer el spec en [`test-manager-library-3413974-docs`](https://github.com/code-sena/test-manager-library-3413974-docs).
-   Se entrega en dos versiones: `spec-python/` y `spec-.net/`.
-3. Desarrollar en los forks.
+---
 
-## El reto se desarrolla con React y PHP (Laravel)
+## 2. Requisitos y Ejecución
 
-El spec está escrito para Python y para .NET, pero el reto **no** se hace en esos lenguajes:
+### Prerrequisitos
+- Node.js v18+ (utiliza la API nativa de `fetch`, sin dependencias externas).
+- El backend de Laravel (`test-manager-library-3413974-api`) corriendo en `http://localhost:8000`.
 
-| Capa | Tecnología del reto |
-|---|---|
-| Frontend | React |
-| Backend | PHP con Laravel |
+### Ejecución
 
-Lo que el spec define sobre el negocio —historias, criterios de aceptación, reglas, contrato de la
-API, modelo de datos— se respeta. Lo que define sobre la tecnología se traduce a React y Laravel.
+```bash
+# Con variables por defecto (localhost:8000, admin / admin12345)
+node seed.js
 
-## La prueba no consiste en escribir el código
+# O mediante npm
+npm run seed
+```
 
-El propósito principal es ver la **capacidad de desempeño con SDD** (*Spec-Driven Development*,
-desarrollo guiado por especificación): cómo se lee, se interpreta y se aplica una especificación
-para llevarla a un stack distinto. El código es el medio, no el fin.
+### Variables de Entorno Opcionales
+- `API_URL`: URL base de la API (por defecto `http://localhost:8000/api/v1`).
+- `ADMIN_USER`: Nombre de usuario del admin (por defecto `admin`).
+- `ADMIN_PASS`: Contraseña del admin (por defecto `admin12345`).
 
-## Feria de presentación
+---
 
-Al cerrar la prueba (3:00 p. m.) cada aprendiz **presenta su proyecto** al grupo: qué construyó del spec, qué dejó fuera y por qué,
-y una demostración corta de lo que funciona (la aplicación y el sitio público). Lo que se presenta es lo que quedó **subido a los forks
-antes de las 3:00 p. m.**: no se presenta nada que no esté en GitHub.
+## 3. Evidencia Real de Ejecución
 
-## Los seis repositorios
+```text
+🚀 Iniciando sembrador de demostración de Manager Library...
+📡 Conectando a http://localhost:8000/api/v1
+✅ Salud del backend: ok
+🔑 Sesión admin iniciada con éxito (rol: admin)
+👤 Bibliotecario 'bibliotecario_demo' creado exitosamente.
+🔑 Sesión de bibliotecario iniciada con éxito.
+📚 5 categorías disponibles en el sistema.
+📖 Sembrando 42 libros en catálogo...
+✅ 42 libros listos en catálogo.
+👥 Sembrando 10 socios...
+✅ 10 socios listos.
+🔄 Registrando préstamos de prueba...
+⏳ Registrando exactamente 3 préstamos vencidos...
 
-| Repositorio | Qué va ahí |
-|---|---|
-| [`test-manager-library-3413974-docs`](https://github.com/code-sena/test-manager-library-3413974-docs) | El spec: `spec-python/` y `spec-.net/` |
-| [`test-manager-library-3413974-api`](https://github.com/code-sena/test-manager-library-3413974-api) | Backend en PHP (Laravel) |
-| [`test-manager-library-3413974-app`](https://github.com/code-sena/test-manager-library-3413974-app) | Frontend en React |
-| [`test-manager-library-3413974-page`](https://github.com/code-sena/test-manager-library-3413974-page) | Sitio público estático de presentación |
-| [`test-manager-library-3413974-infra`](https://github.com/code-sena/test-manager-library-3413974-infra) | Contenedores, red, volúmenes y motor de base de datos vacío |
-| [`test-manager-library-3413974-tool`](https://github.com/code-sena/test-manager-library-3413974-tool) | Utilidades: sembrador de datos de demostración |
+📊 Verificación de /loans/overdue:
+   Líneas vencidas: 3
+   - «Romancero Gitano» (Felipe Vargas Navarro), venció hace 6 días
+   - «Poeta en Nueva York» (Camila Rojas Mendoza), venció hace 6 días
+   - «Los heraldos negros» (Andrés Felipe Vega), venció hace 6 días
+
+📈 Verificación de /reports/most-borrowed:
+   Filas en reporte: 36
+   Libro más prestado: «Los heraldos negros» (2 veces)
+
+✨ ¡Sembrado de datos completado exitosamente!
+```
